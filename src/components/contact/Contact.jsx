@@ -1,22 +1,47 @@
-import css from './Contact.module.css'
-import { FaUser } from "react-icons/fa";
-import { FaPhoneVolume } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
-import {deleteContact} from "../../redux/contacts/operation";
+import { FaUser, FaPhone } from "react-icons/fa";
+import { MdDeleteForever } from "react-icons/md";
+import { useState } from "react";
+import ModalWindow from "../ModalWindow/ModalWindow";
+import s from "./Contact.module.css";
 
-export default function Contact  ({contact}) {
-    const dispatch = useDispatch();
+function Contact({ name, number, id }) {
+  const dispatch = useDispatch();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const handleDelete = () => {
-        dispatch(deleteContact(contact.id))
-    }
- return (
-    <div className={css.divContact}>
-        <div className={css.icon}>
-        <p className={css.textContact}><FaUser  className={css.iconContact} size="19px"/>{contact.name}</p>
-        <p className={css.textContact}><FaPhoneVolume  className={css.iconContact} size="19px"/>{contact.number}</p>
+  const onDeleteProfile = () => {
+    setIsModalOpen(true);
+  };
+
+  return (
+    <div className={s.contactWrapper}>
+      <div className={s.contactInfo}>
+        <div className={s.infoRow}>
+          <FaUser className={s.icon} />
+          <span className={s.contactName}>{name}</span>
         </div>
-        <button className={css.btnContact} onClick={handleDelete}>Delete</button>
+        <div className={s.infoRow}>
+          <FaPhone className={s.icon} />
+          <span className={s.contactNumber}>{number}</span>
+        </div>
+      </div>
+
+      <button
+        className={s.iconButton}
+        onClick={onDeleteProfile}
+        title="Delete contact"
+      >
+        <MdDeleteForever size={22} />
+      </button>
+
+      <ModalWindow
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        id={id}
+        name={name}
+      />
     </div>
- );
+  );
 }
+
+export default Contact;

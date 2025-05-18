@@ -1,46 +1,73 @@
-import { Formik, Form, Field } from 'formik';
-import { useDispatch } from 'react-redux';
-import { useId } from "react";
-import { logIn } from '../../redux/auth/operations';
+import { ErrorMessage, Field, Formik, Form } from "formik";
+import { useDispatch } from "react-redux";
+import s from "./LoginForm.module.css";
+import { apiLoginUser } from "../../redux/auth/operations";
+import toast from "react-hot-toast";
+import { loginProfileSchema } from "../../util/schemas";
 
-export default function LoginForm () {
-    const initialValues = {
-        email: "",
-        password: ""
-      };
-      const emailFieldId = useId();
-      const passwordFieldId = useId();
-     
-      const dispatch = useDispatch();
+const initialValues = {
+  email: "",
+  password: "",
+};
 
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        const form = e.currentTarget;
-    
-        dispatch(
-          logIn({
-            email: form.elements.email.value,
-            password: form.elements.password.value,
-          })
-        )
-        .unwrap()
+const LoginForm = () => {
+  const dispatch = useDispatch();
+
+  const onLogin = (formData, actions) => {
+    dispatch(apiLoginUser(formData))
+      .unwrap()
       .then(() => {
-        console.log('login success');
+        toast.success("You have successfully logged in");
+        actions.resetForm();
       })
       .catch(() => {
-        console.log('login error');
+        toast.error("Incorrect email or password");
       });
-        form.reset();
-      };
-    return (
-      <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-        <Form>
-        <label htmlFor={emailFieldId}>Email</label>
-        <Field type="email" name="email" />
-        <label htmlFor={passwordFieldId}>Password</label>
-        <Field type="password" name="password" />
-        <button type="submit">Log In</button>
-        </Form>
-      </Formik>
-    );
   };
+
+  return (
+    <Formik
+      initialValues={initialValues}
+      onSubmit={onLogin}
+      validationSchema={loginProfileSchema}
+    >
+      <Form className={s.formField}>
+        <label className={s.inputField}>
+          <span className={s.inputTitle}>Email</span>
+          <Field
+            className={s.inputArea}
+            type="text"
+            name="email"
+            placeholder="example@gmail.com"
+          />
+          <ErrorMessage
+            className={s.errorMessage}
+            name="email"
+            component="span"
+          />
+        </label>
+
+        <label className={s.inputField}>
+          <span className={s.inputTitle}>Password</span>
+          <Field
+            className={s.inputArea}
+            type="password"
+            name="password"
+            placeholder="*********"
+          />
+          <ErrorMessage
+            className={s.errorMessage}
+            name="password"
+            component="span"
+          />
+        </label>
+
+        <button type="submit" className={s.addBtn}>
+          Login
+        </button>
+      </Form>
+    </Formik>
+  );
+};
+
+export default LoginForm;

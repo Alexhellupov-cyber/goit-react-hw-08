@@ -1,43 +1,87 @@
-import css from './ContactForm.module.css';
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
+import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import {addContact} from "../../redux/contacts/operation";
+import { addContact } from "../../redux/contacts/operations";
+import { selectContacts } from "../../redux/contacts/selectors";
+import s from "./ContactForm.module.css";
 
-export default function ContactForm () {
-    const dispatch = useDispatch();
-    const contacts = useSelector(state => state.contacts.items);
+const initialValues = {
+  name: "",
+  number: "",
+};
 
-    const contactSchema = Yup.object().shape({
-        name:Yup.string().min(3, "Too Short!").max(50, "Too Long!").required("Required"),
-        number:Yup.string().min(3, "Too Short!").max(80, "Too Long!").required("Required"),
-    });
+const regex = /^(?=.*?[1-9])[0-9()-]+$/;
 
-    const handleSubmit = (values, actions) => {
-        const isExist = contacts.some(contact => contact.name.toLowerCase() === values.name.toLowerCase());
-        if (isExist) {
-        alert('This contact already exists!');
-        actions.resetForm();
-        return; 
-       }
-        dispatch(addContact({
-            name: values.name,
-            number: values.number,
-          }));
-          actions.resetForm();
-        };
-        
-        return (
-            <Formik initialValues={{name:"", number:""}} onSubmit={handleSubmit} validationSchema={contactSchema}>
-                <Form className={css.form}>
-                 <label className={css.formLabel}>Name</label>   
-                 <Field type="text" name="name" className={css.formField}/>
-                 <ErrorMessage name="name" component="span" className={css.formError}/>
-                 <label className={css.formLabel}>Number</label>
-                 <Field type="tel" name="number" className={css.formField}/>
-                 <ErrorMessage name="number" component="span" className={css.formError}/>
-                <button type="submit" className={css.formBtn}>Add Contact</button>
-                </Form>
-            </Formik>
-        )
+const addProfileSchema = yup.object({
+  name: yup
+    .string()
+    .min(3, "name should have at least 3 symbols")
+    .max(50, "name should have less than 50 symbols")
+    .required("Name is required"),
+  number: yup
+    .string()
+    .required("phone is required")
+    .min(3, "too short!")
+    .max(50, "too long!")
+    .matches(regex, "enter valid number"),
+});
+
+const ContactForm = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(selectContacts);
+
+  const onAddProfile = (formData, actions) => {
+    const isDuplicate = contacts.some(
+      (contact) =>
+        contact.name.toLowerCase().trim() === formData.name.toLowerCase().trim()
+    );
+
+    if (isDuplicate) {
+      alert(`${formData.name} is already in contacts`);
+      return;
     }
+
+    dispatch(addContact(formData));
+    actions.resetForm();
+  };
+
+  return (
+    <Formik
+      initialValues={initialValues}
+      onSubmit={onAddProfile}
+      validationSchema={addProfileSchema}
+    >
+      <Form className={s.formWrapper}>
+        <label className={s.label}>
+          Name
+          <Field
+            className={s.input}
+            type="text"
+            name="name"
+            placeholder="Enter your name"
+          />
+          <ErrorMessage name="name" component="div" className={s.error} />
+        </label>
+
+        <label className={s.label}>
+          Number
+          <Field
+            className={s.input}
+            type="text"
+            name="number"
+            placeholder="Enter phone number"
+          />
+          <ErrorMessage name="number" component="div" className={s.error} />
+        </label>
+
+        <div className={s.buttonWrapper}>
+          <button type="submit" className={s.button}>
+            Add Contact
+          </button>
+        </div>
+      </Form>
+    </Formik>
+  );
+};
+
+export default ContactForm;

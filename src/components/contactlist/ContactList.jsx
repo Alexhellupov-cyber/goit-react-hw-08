@@ -1,22 +1,34 @@
-import Contact from '../contact/Contact.jsx';
-import css from './ContactList.module.css';
-import { useSelector } from 'react-redux';
-import {selectFilteredContacts} from "../../redux/contacts/slice.js";
+import { useSelector } from "react-redux";
+import Contact from "../Contact/Contact";
+import s from "./ContactList.module.css";
+import { selectFilteredContacts } from "../../redux/contacts/selectors";
 
-export default function ContactList () {
+const ContactList = () => {
+  const { original, visible } = useSelector(selectFilteredContacts);
 
-    const visibleContacts = useSelector(selectFilteredContacts);
-      /*console.log('contacts', contacts);
-      console.log('filter', filter);
-      console.log('visibleContacts', visibleContacts);*/
+  if (original.length === 0) {
+    return (
+      <p className={s.noContactsMessage}>No contacts in your phonebook yet!</p>
+    );
+  }
 
- return (
-    <ul className={css.listContact}>
-        {visibleContacts.map(contact => (
-            <li className={css.itemContact} key={contact.id}>
-                <Contact contact={contact}/>
-            </li>
-        ))}
+  if (visible.length === 0) {
+    return (
+      <p className={s.noContactsMessage}>
+        No contacts matching the query were found!
+      </p>
+    );
+  }
+
+  return (
+    <ul className={s.contactList}>
+      {visible.map(({ id, name, number }) => (
+        <li key={id} className={s.contactItem}>
+          <Contact id={id} name={name} number={number} />
+        </li>
+      ))}
     </ul>
- );
-}
+  );
+};
+
+export default ContactList;
