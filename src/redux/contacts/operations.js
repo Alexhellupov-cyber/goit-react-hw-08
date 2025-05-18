@@ -1,63 +1,45 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const contactsInstance = axios.create({
-  baseURL: "https://connections-api.goit.global",
-});
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { goitAPI } from "../auth/operations";
 
-export const fetchContacts = createAsyncThunk(
+// axios.defaults.baseURL = "https://68188cec5a4b07b9d1cfb0b6.mockapi.io";
+// export const mockAPI = axios.create({
+//   baseURL: "https://68188cec5a4b07b9d1cfb0b6.mockapi.io",
+// });
+
+export const fetchContactsData = createAsyncThunk(
   "contacts/fetchAll",
   async (_, thunkAPI) => {
-    const token = thunkAPI.getState().auth.token;
-    if (!token) {
-      return thunkAPI.rejectWithValue("No token");
-    }
-
     try {
-      const res = await contactsInstance.get("/contacts", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return res.data;
-    } catch (e) {
-      return thunkAPI.rejectWithValue(e.message);
+      const response = await goitAPI.get("/contacts");
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
 
-export const addContact = createAsyncThunk(
-  "contacts/addContact",
-  async (contact, thunkAPI) => {
-    const token = thunkAPI.getState().auth.token;
-    if (!token) {
-      return thunkAPI.rejectWithValue("No token");
-    }
-
-    try {
-      const res = await contactsInstance.post("/contacts", contact, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return res.data;
-    } catch (e) {
-      return thunkAPI.rejectWithValue(e.message);
-    }
-  }
-);
-
-export const deleteContact = createAsyncThunk(
+export const deleteContactData = createAsyncThunk(
   "contacts/deleteContact",
   async (id, thunkAPI) => {
-    const token = thunkAPI.getState().auth.token;
-    if (!token) {
-      return thunkAPI.rejectWithValue("No token");
-    }
-
     try {
-      const res = await contactsInstance.delete(`/contacts/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return res.data;
-    } catch (e) {
-      return thunkAPI.rejectWithValue(e.message);
+      await goitAPI.delete(`/contacts/${id}`);
+      return id;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const addContactDataThunk = createAsyncThunk(
+  "contacts/addContact",
+  async (body, thunkAPI) => {
+    try {
+      const response = await goitAPI.post("/contacts", body);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
     }
   }
 );

@@ -1,76 +1,68 @@
-import axios from "axios";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
-axios.defaults.baseURL = "https://connections-api.goit.global";
-
+export const goitAPI = axios.create({
+  baseURL: "https://connections-api.goit.global",
+});
 const setAuthHeader = (token) => {
-  axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+  goitAPI.defaults.headers.common.Authorization = `Bearer ${token}`;
 };
-
 const clearAuthHeader = () => {
-  axios.defaults.headers.common.Authorization = "";
+  goitAPI.defaults.headers.common.Authorization = "";
 };
-
-const saveToken = (token) => {
-  localStorage.setItem("token", token);
-};
-
-const removeToken = () => {
-  localStorage.removeItem("token");
-};
-
-export const register = createAsyncThunk(
+///
+///
+export const registerThunk = createAsyncThunk(
   "auth/register",
-  async (credentials, thunkAPI) => {
+  async (body, thunkAPI) => {
     try {
-      const res = await axios.post("/users/signup", credentials);
-      setAuthHeader(res.data.token);
-      saveToken(res.data.token);
-      return res.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || error.message);
-    }
-  }
-);
-
-export const login = createAsyncThunk(
-  "auth/login",
-  async (credentials, thunkAPI) => {
-    try {
-      const res = await axios.post("/users/login", credentials);
-      setAuthHeader(res.data.token);
-      saveToken(res.data.token);
-      return res.data;
+      const response = await goitAPI.post("/users/signup", body);
+      setAuthHeader(response.data.token);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
 
-export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
-  try {
-    await axios.post("/users/logout");
-    clearAuthHeader();
-    removeToken();
-  } catch (error) {
-    return thunkAPI.rejectWithValue(error.message);
+export const loginThunk = createAsyncThunk(
+  "auth/login",
+  async (body, thunkAPI) => {
+    try {
+      const response = await goitAPI.post("/users/login", body);
+      setAuthHeader(response.data.token);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
   }
-});
+);
 
-export const refreshUser = createAsyncThunk(
+export const logoutThunk = createAsyncThunk(
+  "auth/logout",
+  async (_, thunkAPI) => {
+    try {
+      await goitAPI.post("/users/logout");
+      clearAuthHeader();
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
+export const refreshThunk = createAsyncThunk(
   "auth/refresh",
   async (_, thunkAPI) => {
     const state = thunkAPI.getState();
     const persistedToken = state.auth.token;
 
-    if (!persistedToken) {
-      return thunkAPI.rejectWithValue("No token available for user refresh.");
+    if (persistedToken === null) {
+      return thunkAPI.rejectWithValue("No valid token");
     }
-
+    setAuthHeader(persistedToken);
     try {
-      setAuthHeader(persistedToken);
-      const res = await axios.get("/users/current");
-      return res.data;
+      const response = await goitAPI.get("/users/current");
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
     }

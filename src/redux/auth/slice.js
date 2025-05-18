@@ -1,48 +1,52 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { register, login, logout, refreshUser } from "./operations";
+import {
+  loginThunk,
+  logoutThunk,
+  refreshThunk,
+  registerThunk,
+} from "./operations";
 
 const initialState = {
-  user: { name: null, email: null },
-  token: localStorage.getItem("token"),
-  isLoggedIn: !!localStorage.getItem("token"),
+  user: {
+    name: null,
+    email: null,
+  },
+  token: null,
+  isLoggedIn: false,
   isRefreshing: false,
 };
-
-const authSlice = createSlice({
+const slice = createSlice({
   name: "auth",
   initialState,
   extraReducers: (builder) => {
     builder
-      .addCase(register.fulfilled, (state, action) => {
+      .addCase(registerThunk.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isLoggedIn = true;
       })
-
-      .addCase(login.fulfilled, (state, action) => {
+      .addCase(loginThunk.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isLoggedIn = true;
       })
-
-      .addCase(logout.fulfilled, (state) => {
+      .addCase(logoutThunk.fulfilled, (state) => {
         state.user = { name: null, email: null };
         state.token = null;
         state.isLoggedIn = false;
       })
-
-      .addCase(refreshUser.pending, (state) => {
+      .addCase(refreshThunk.fulfilled, (state, action) => {
+        (state.isLoggedIn = true),
+          (state.user = action.payload),
+          (state.isRefreshing = false);
+      })
+      .addCase(refreshThunk.pending, (state, action) => {
         state.isRefreshing = true;
       })
-      .addCase(refreshUser.fulfilled, (state, action) => {
-        state.user = action.payload;
-        state.isLoggedIn = true;
-        state.isRefreshing = false;
-      })
-      .addCase(refreshUser.rejected, (state) => {
+      .addCase(refreshThunk.rejected, (state, action) => {
         state.isRefreshing = false;
       });
   },
 });
 
-export default authSlice.reducer;
+export const authReduser = slice.reducer;

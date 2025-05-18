@@ -1,19 +1,32 @@
-import Navigation from "../Navigation/Navigation";
+import React from "react";
+import clsx from "clsx";
+import css from "./Header.module.css";
+import { NavLink } from "react-router-dom";
+import {useSelector } from "react-redux";
+import { selectIsloggetIn, selectUser } from "../../redux/auth/selectors";
+
 import AuthNav from "../AuthNav/AuthNav";
+import Navigation from "../Navigation/Navigation";
 import UserMenu from "../UserMenu/UserMenu";
-import { useSelector } from "react-redux";
-import { selectIsLoggedIn } from "../../redux/auth/selectors";
-import s from "./AppBar.module.css";
+export const setActiveClass = ({ isActive }) => {
+  return clsx(css.link, isActive && css.active);
+};
 
-const AppBar = () => {
-  const isLoggedIn = useSelector(selectIsLoggedIn);
-
+const AppBar  = () => {
+  const isLoggedIn = useSelector(selectIsloggetIn);
   return (
-    <header className={s.header}>
-      <Navigation />
-      {isLoggedIn ? <UserMenu /> : <AuthNav />}
+    <header className={css.header}>
+      <nav className={css.nav}>
+        <Navigation/> 
+        {!isLoggedIn && (
+          <AuthNav/>
+        )}
+        
+      </nav>
+        <UserMenu/>
+      
     </header>
   );
 };
 
-export default AppBar;
+export default AppBar ;

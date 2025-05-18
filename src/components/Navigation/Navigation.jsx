@@ -1,36 +1,23 @@
-import { NavLink } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { selectIsLoggedIn } from "../../redux/auth/selectors";
-import s from "./Navigation.module.css";
-import { motion, AnimatePresence } from "framer-motion";
-import clsx from "clsx";
+import React from 'react'
+import { NavLink } from 'react-router-dom'
+import { setActiveClass } from '../AppBar/AppBar'
+import { selectIsloggetIn } from '../../redux/auth/selectors';
+import { useSelector } from 'react-redux';
 
 const Navigation = () => {
-  const isLoggedIn = useSelector(selectIsLoggedIn);
-
-  const activeStyle = ({ isActive }) => clsx(s.link, isActive && s.activeLink);
-
-  return (
-    <AnimatePresence>
-      <motion.nav
-        className={s.nav}
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <NavLink to="/" className={activeStyle}>
-          Home
-        </NavLink>
-
-        {isLoggedIn && (
-          <NavLink to="/contacts" className={activeStyle}>
-            Contacts
+    const isLoggedIn = useSelector(selectIsloggetIn);
+  return <>
+            <NavLink className={setActiveClass} to="/">
+            Home
           </NavLink>
-        )}
-      </motion.nav>
-    </AnimatePresence>
-  );
-};
+    {isLoggedIn && (
+               <NavLink className={setActiveClass} to="/contacts">
+          Contacts
+        </NavLink>
+              )}
+            </>
+}
 
-export default Navigation;
+export default Navigation
+
+ 

@@ -1,87 +1,79 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as yup from "yup";
-import { useDispatch, useSelector } from "react-redux";
-import { addContact } from "../../redux/contacts/operations";
-import { selectContacts } from "../../redux/contacts/selectors";
-import s from "./ContactForm.module.css";
+import { Field, Form, Formik } from "formik";
+import * as Yup from "yup";
+import { ErrorMessage } from "formik";
+import css from "./ContactForm.module.css";
+import { nanoid } from "nanoid";
+import { useDispatch } from "react-redux";
 
-const initialValues = {
-  name: "",
-  number: "",
-};
+import { addContactDataThunk } from "../../redux/contacts/operations";
 
-const regex = /^(?=.*?[1-9])[0-9()-]+$/;
-
-const addProfileSchema = yup.object({
-  name: yup
-    .string()
-    .min(3, "name should have at least 3 symbols")
-    .max(50, "name should have less than 50 symbols")
-    .required("Name is required"),
-  number: yup
-    .string()
-    .required("phone is required")
-    .min(3, "too short!")
-    .max(50, "too long!")
-    .matches(regex, "enter valid number"),
-});
-
-const ContactForm = () => {
+const ContactFrom = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector(selectContacts);
+  const onSubmit = (value, options) => {
+    const id = nanoid();
+    const newContact = {
+      ...value,
+      id,
+    };
 
-  const onAddProfile = (formData, actions) => {
-    const isDuplicate = contacts.some(
-      (contact) =>
-        contact.name.toLowerCase().trim() === formData.name.toLowerCase().trim()
-    );
-
-    if (isDuplicate) {
-      alert(`${formData.name} is already in contacts`);
-      return;
-    }
-
-    dispatch(addContact(formData));
-    actions.resetForm();
+    dispatch(addContactDataThunk(newContact));
+    options.resetForm();
   };
 
+  const initialsValue = {
+    id: "",
+    name: "",
+    number: "",
+  };
+  const AddErrorShemaYup = Yup.object().shape({
+    name: Yup.string()
+      .min(3, "Too Short!")
+      .max(50, "Too Long!")
+      .required("Required"),
+    number: Yup.string()
+      .min(3, "Too Short!")
+      .max(50, "Too Long!")
+      .required("Required"),
+  });
+
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={onAddProfile}
-      validationSchema={addProfileSchema}
-    >
-      <Form className={s.formWrapper}>
-        <label className={s.label}>
-          Name
-          <Field
-            className={s.input}
-            type="text"
-            name="name"
-            placeholder="Enter your name"
-          />
-          <ErrorMessage name="name" component="div" className={s.error} />
-        </label>
+    <>
+      <Formik
+        onSubmit={onSubmit}
+        initialValues={initialsValue}
+        validationSchema={AddErrorShemaYup}
+      >
+        <Form>
+          <div className={css.formWrapper}>
+            <div>
+              <label> Name</label>
+              <Field
+                name="name"
+                placeholder="Enter name"
+                className="input mb-2"
+              ></Field>
+              <ErrorMessage name="name" className={css.error} component="div" />
+            </div>
+            <label>Number</label>
+            <Field
+              className="input"
+              name="number"
+              type="tell"
+              placeholder="Enter number phone"
+            ></Field>
+            <ErrorMessage name="number" className={css.error} component="div" />
 
-        <label className={s.label}>
-          Number
-          <Field
-            className={s.input}
-            type="text"
-            name="number"
-            placeholder="Enter phone number"
-          />
-          <ErrorMessage name="number" component="div" className={s.error} />
-        </label>
-
-        <div className={s.buttonWrapper}>
-          <button type="submit" className={s.button}>
-            Add Contact
-          </button>
-        </div>
-      </Form>
-    </Formik>
+            <button
+              type="submit"
+              className="btn m-auto w-30 btn-xs btn-dash btn-primary"
+            >
+              Add contact
+            </button>
+          </div>
+        </Form>
+      </Formik>
+    </>
   );
 };
 
-export default ContactForm;
+export default ContactFrom;

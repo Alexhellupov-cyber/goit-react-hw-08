@@ -1,34 +1,30 @@
 import { useSelector } from "react-redux";
-import Contact from "../Contact/Contact";
-import s from "./ContactList.module.css";
-import { selectFilteredContacts } from "../../redux/contacts/selectors";
+import Contact from "./Contact";
+import css from "./ContactList.module.css";
+import {
+  // selectError,
+  selectFilteredContacts,
+  // selectLoading,
+} from "../../redux/contacts/slice";
+import { selectError, selectLoading } from "../../redux/contacts/selectors";
 
 const ContactList = () => {
-  const { original, visible } = useSelector(selectFilteredContacts);
-
-  if (original.length === 0) {
-    return (
-      <p className={s.noContactsMessage}>No contacts in your phonebook yet!</p>
-    );
-  }
-
-  if (visible.length === 0) {
-    return (
-      <p className={s.noContactsMessage}>
-        No contacts matching the query were found!
-      </p>
-    );
-  }
+  const error = useSelector(selectError);
+  const loading = useSelector(selectLoading);
+  const FilterSelector = useSelector(selectFilteredContacts);
 
   return (
-    <ul className={s.contactList}>
-      {visible.map(({ id, name, number }) => (
-        <li key={id} className={s.contactItem}>
-          <Contact id={id} name={name} number={number} />
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul className={css.listItem}>
+        {FilterSelector.map((item) => (
+          <li key={item.id}>
+            <Contact DataItem={item} />
+          </li>
+        ))}
+      </ul>
+      {loading && <h2>Loading...</h2>}
+      {error && <h2>Error 404...</h2>}
+    </>
   );
 };
-
 export default ContactList;
