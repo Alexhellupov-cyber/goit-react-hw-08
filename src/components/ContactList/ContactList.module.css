@@ -1,0 +1,19 @@
+.contactList {
+  list-style: none;
+  padding: 0;
+  margin: 20px auto;
+  max-width: 300px;
+}
+
+.contactItem {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.noContactsMessage {
+  color: red;
+  font-size: 20px;
+  text-align: center;
+  font-weight: bold;
+  margin-top: 20px;
+}
